@@ -1,7 +1,7 @@
 profile: development
 docker_tag: pelican:postgres
 database:
-  version: 8
+  version: 11.5
   type: postgres
   username: postgres
   password: postgres
@@ -21,7 +21,7 @@ queries:
 profile: production
 docker_tag: pelican:postgres
 database:
-  version: 8
+  version: 11.5
   type: postgres
   username: postgres
   password: postgres

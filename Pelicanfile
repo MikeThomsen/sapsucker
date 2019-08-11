@@ -1,0 +1,33 @@
+profile: development
+database:
+  type: postgresql
+  username: postgres
+  password: postgres
+  host: localhost
+  port: 5432
+  database_name: test_data
+kakfa:
+  broker_list:
+    - localhost:1234
+    - localhost:1235
+queries:
+  fetch_users:
+    sql: SELECT * FROM user_table
+    kafka_topic: user_topic
+---
+profile: production
+database:
+  type: postgresql
+  username: postgres
+  password: postgres
+  host: localhost
+  port: 5432
+  database_name: test_data
+kakfa:
+  broker_list:
+    - localhost:1234
+    - localhost:1235
+queries:
+  fetch_users:
+    sql: SELECT * FROM user_table
+    kafka_topic: user_topic

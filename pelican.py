@@ -3,6 +3,8 @@ import docker
 import json
 import yaml
 
+from pelican import SqlRunner
+
 def parse_args():
 	parser = argparse.ArgumentParser(description='Build docker images around data for quick extraction.')
 	parser.add_argument('command', choices=["build", "dryrun", "showprofiles"])
@@ -50,4 +52,8 @@ if __name__ == "__main__":
 		print("Building docker image (this could take a while)...")
 		docker_client.images.build(path="./", dockerfile=ret_val, tag=profile["docker_tag"])
 		print("Finished building docker image.")
+	elif args.command == "dryrun":
+		current_profile = profiles[args.profile]
+		sql_runner = SqlRunner(current_profile, args.command)
+		sql_runner.execute_queries()
 

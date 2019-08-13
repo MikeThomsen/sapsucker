@@ -53,7 +53,9 @@ if __name__ == "__main__":
 		docker_client.images.build(path="./", dockerfile=ret_val, tag=profile["docker_tag"])
 		print("Finished building docker image.")
 	elif args.command == "dryrun":
+		print("Dry run")
 		current_profile = profiles[args.profile]
 		sql_runner = SqlRunner(current_profile, args.command)
 		sql_runner.execute_queries()
+		sql_runner.finish()
 

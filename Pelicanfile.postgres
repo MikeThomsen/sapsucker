@@ -9,14 +9,14 @@ database:
   port: 5432
   database_name: test_data
   source: postgres-test.sql
-kakfa:
+kafka:
   broker_list:
-    - localhost:1234
-    - localhost:1235
+    - localhost:32770
 queries:
   fetch_users:
-    sql: SELECT * FROM user_table
+    sql: SELECT username, email_address FROM user_table
     kafka_topic: user_topic
+    schema: ./user.avsc
 ---
 profile: production
 docker_tag: pelican:postgres
@@ -29,11 +29,11 @@ database:
   port: 5432
   database_name: test_data
   source: postgres-test.sql
-kakfa:
+kafka:
   broker_list:
-    - localhost:1234
-    - localhost:1235
+    - localhost:32770
 queries:
   fetch_users:
     sql: SELECT * FROM user_table
     kafka_topic: user_topic
+    schema: ./user.avsc

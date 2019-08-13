@@ -7,7 +7,7 @@ from pelican import SqlRunner
 
 def parse_args():
 	parser = argparse.ArgumentParser(description='Build docker images around data for quick extraction.')
-	parser.add_argument('command', choices=["build", "dryrun", "showprofiles"])
+	parser.add_argument('command', choices=["build", "dryrun", "showprofiles", "ingest"])
 	parser.add_argument("--profile", type=str)
 	parser.add_argument("--pelicanfile", type=str)
 
@@ -52,8 +52,8 @@ if __name__ == "__main__":
 		print("Building docker image (this could take a while)...")
 		docker_client.images.build(path="./", dockerfile=ret_val, tag=profile["docker_tag"])
 		print("Finished building docker image.")
-	elif args.command == "dryrun":
-		print("Dry run")
+	elif args.command in [ "dryrun", "ingest" ]:
+		print(f"Running a \"{args.command}\"")
 		current_profile = profiles[args.profile]
 		sql_runner = SqlRunner(current_profile, args.command)
 		sql_runner.execute_queries()

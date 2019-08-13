@@ -11,7 +11,7 @@ database:
   source: postgres-test.sql
 kafka:
   broker_list:
-    - localhost:32770
+    - localhost:32772
 queries:
   fetch_users:
     sql: SELECT username, email_address FROM user_table

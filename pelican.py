@@ -10,11 +10,43 @@ from pelican import SqlRunner
 
 def parse_args():
 	parser = argparse.ArgumentParser(description='Build docker images around data for quick extraction.')
-	parser.add_argument('command', choices=["build", "dryrun", "showprofiles", "ingest", "makedockerfile"])
+	parser.add_argument('command', choices=["build", "dryrun", "init", "showprofiles", "ingest", "makedockerfile"])
 	parser.add_argument("--profile", type=str)
 	parser.add_argument("--pelicanfile", type=str)
 
 	return parser.parse_args()
+
+def init_pelicanfile():
+	struct = {
+		"profile": "development",
+		"docker_tag": "pelican:postgres",
+		"database": {
+			"version": 11.5,
+			"type": "postgres",
+			"username": "postgres",
+			"password": "postgres",
+			"host": "localhost",
+			"port": 5432,
+			"database_name": "test_data",
+			"source": "postgres-test.sql",
+		},
+		"kafka": {
+			"broker_list": [
+		    	"localhost:32772"
+		    ]
+		},
+		"queries": {
+			"fetch_users": {
+				"sql": "SELECT * FROM user_table",
+				"kafka_topic": "my_topic",
+				"schema": "user.avsc"
+			}
+	    }
+	}
+
+	with open("./Pelicanfile", "w", encoding='utf-8') as raw:
+		yaml.dump(struct, raw)
+		print("Created Pelicanfile.")
 
 def create_dockerfile(profile: dict):
 	from_line = f"FROM {profile['database']['type']}:{profile['database']['version']}"
@@ -44,7 +76,6 @@ def create_dockerfile(profile: dict):
 			avro_path = os.path.dirname(query["schema"])
 			output.write(f"COPY {query['schema']} /opt/pelican/{query['schema']}\n")
 
-		#output.write("COPY user.avsc /opt/pelican/user.avsc\n")
 		output.write("COPY Pelicanfile.postgres /opt/pelican/Pelicanfile")
 		print("Wrote dockerfile")
 
@@ -61,7 +92,9 @@ if __name__ == "__main__":
 			raise KeyError("Missing key 'profile.'")
 		profiles[profile['profile']] = profile
 	
-	if args.command == "showprofiles":
+	if args.command == "init":
+		init_pelicanfile()
+	elif args.command == "showprofiles":
 		print("Available profiles:")
 		for profile in profiles:
 			print(f"{profile}:\n{json.dumps(profiles[profile], sort_keys=True, indent=4)}")

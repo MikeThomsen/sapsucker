@@ -104,6 +104,8 @@ class SqlRunner:
 						print("Producing...")
 						self.kafka_handler.send_record_set(topic, content)
 				except:
+					import traceback
+					traceback.print_exc()
 					current_table[BAD_RECORDS] = current_table[BAD_RECORDS] + 1
 					if self.command == "ingest":
 						print("Fatal error processing records during ingest.")

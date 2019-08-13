@@ -16,7 +16,7 @@ queries:
   fetch_users:
     sql: SELECT username, email_address FROM user_table
     kafka_topic: user_topic
-    schema: ./user.avsc
+    schema: user.avsc
 ---
 profile: production
 docker_tag: pelican:postgres
@@ -36,4 +36,4 @@ queries:
   fetch_users:
     sql: SELECT * FROM user_table
     kafka_topic: user_topic
-    schema: ./user.avsc
+    schema: user.avsc

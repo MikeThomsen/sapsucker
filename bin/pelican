@@ -65,11 +65,8 @@ def create_dockerfile(profile: dict):
 		output.write("RUN apt-get install -y libffi-dev\n")
 		output.write("RUN wget https://www.python.org/ftp/python/3.7.2/Python-3.7.2.tgz -O /tmp/python.tgz\n")
 		output.write("RUN cd /tmp && tar -zxvf python.tgz && cd Python-3.7.2 && ./configure --enable-optimizations && make altinstall\n")
-		output.write("RUN pip3.7 install pykafka pymysql psycopg2-binary avro-python3 docker pyyaml\n")
-		output.write("RUN mkdir /opt/pelican\n")
-		output.write("COPY pelican.py /opt/pelican\n")
-		output.write("ADD pelican /opt/pelican/pelican\n")
-		output.write("RUN chmod 755 /opt/pelican/pelican.py\n")
+		output.write("COPY dist/pelican-0.5.tar.gz /tmp/pelican-0.5.tar.gz\n")
+		output.write("RUN pip3.7 install /tmp/pelican-0.5.tar.gz\n")
 
 		for key in profile["queries"]:
 			query = profile["queries"][key]

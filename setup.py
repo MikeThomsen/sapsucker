@@ -4,7 +4,7 @@ except:
     from distutils.core import setup
 
 config = {
-    'description': 'Pelican is a tool for dockerizing databases and making them ready for quick ingestion.',
+    'description': 'Sapsucker is a tool for dockerizing databases and making them ready for quick ingestion.',
     'author': 'Mike Thomsen',
     'url': 'No URL',
     'download_url': 'Just local',

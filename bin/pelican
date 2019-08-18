@@ -56,7 +56,6 @@ def create_dockerfile(profile: dict):
 	docker_path = f"./Dockerfile.{profile['profile']}.{profile['database']['type']}"
 	with open(docker_path, "w", encoding='utf-8') as output:
 		output.write(f"{from_line}\n")
-		output.write(f"{copy_line}\n")
 		output.write("RUN apt-get update\n")
 		output.write("RUN apt-get -y upgrade\n")
 		output.write("RUN apt-get install -y wget build-essential python-dev python-setuptools python-pip python-smbus\n")
@@ -71,10 +70,12 @@ def create_dockerfile(profile: dict):
 
 		for key in profile["queries"]:
 			query = profile["queries"][key]
-			avro_path = os.path.dirname(query["schema"])
-			output.write(f"COPY {query['schema']} /opt/pelican/{query['schema']}\n")
+			if "schema" in query:
+				avro_path = os.path.dirname(query["schema"])
+				output.write(f"COPY {query['schema']} /opt/pelican/{query['schema']}\n")
 
-		output.write("COPY Pelicanfile.postgres /opt/pelican/Pelicanfile")
+		output.write(f"COPY {docker_path} /opt/pelican/Pelicanfile\n")
+		output.write(f"{copy_line}\n")
 		pelican_log("Wrote dockerfile")
 
 	return docker_path

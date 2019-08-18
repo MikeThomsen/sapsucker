@@ -5,6 +5,7 @@ import json
 import yaml
 import os
 import os.path
+import sys
 from pelican_lib import SqlRunner, pelican_log
 
 def parse_args():
@@ -82,6 +83,11 @@ def create_dockerfile(profile: dict):
 if __name__ == "__main__":
 	docker_client = docker.from_env()
 	args = parse_args()
+
+	if args.command == "init":
+		init_pelicanfile()
+		sys.exit(0)
+
 	configuration_path = args.pelicanfile if args.pelicanfile else "./Pelicanfile"
 	profiles = {}
 	for profile in yaml.load_all(open(configuration_path), Loader=yaml.SafeLoader):
@@ -89,9 +95,7 @@ if __name__ == "__main__":
 			raise KeyError("Missing key 'profile.'")
 		profiles[profile['profile']] = profile
 	
-	if args.command == "init":
-		init_pelicanfile()
-	elif args.command == "showprofiles":
+	if args.command == "showprofiles":
 		pelican_log("Available profiles:")
 		for profile in profiles:
 			pelican_log(f"{profile}:\n{json.dumps(profiles[profile], sort_keys=True, indent=4)}")

@@ -11,9 +11,9 @@ config = {
     'author_email': 'mikerthomsen@gmail.com',
     'version': '0.5',
     'install_requires': [ 'pykafka', 'pymysql', 'pyyaml', 'psycopg2-binary', 'avro-python3', 'docker'],
-    'packages': ['pelican_lib'],
-    'scripts': ['bin/pelican'],
-    'name': 'pelican'
+    'packages': ['sapsucker_lib'],
+    'scripts': ['bin/sapsucker'],
+    'name': 'sapsucker'
 }
 
 setup(**config)

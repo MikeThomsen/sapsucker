@@ -1,5 +1,5 @@
 profile: development
-docker_tag: pelican:postgres
+docker_tag: sapsucker/postgres:dev
 database:
   version: 11.5
   type: postgres
@@ -18,7 +18,7 @@ queries:
     kafka_topic: user_noschema_topic
 ---
 profile: production
-docker_tag: pelican:postgres
+docker_tag: sapsucker/postgres:prod
 database:
   version: 11.5
   type: postgres

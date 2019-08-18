@@ -15,7 +15,7 @@ import logging.handlers
 import os
  
 handler = logging.handlers.WatchedFileHandler(
-    os.environ.get("LOGFILE", "./pelican.log"))
+    os.environ.get("LOGFILE", "./sapsucker.log"))
 # formatter = logging.Formatter(logging.BASIC_FORMAT)
 # handler.setFormatter(formatter)
 root = logging.getLogger()
@@ -23,7 +23,7 @@ root.setLevel(os.environ.get("LOGLEVEL", "INFO"))
 root.addHandler(handler)
 root.addHandler(logging.StreamHandler())
 
-def pelican_log(msg: str, ex: Exception = None):
+def sapsucker_log(msg: str, ex: Exception = None):
 	logging.info(msg)
 	if ex:
 		logging.exception(ex)
@@ -69,8 +69,8 @@ class SqlRunner:
 		if 'kafka' in self.profile and command == "ingest":
 			self.kafka_handler = KafkaHandler(self.profile)
 		else:
-			pelican_log("No kafka")
-			pelican_log(self.profile)
+			sapsucker_log("No kafka")
+			sapsucker_log(self.profile)
 			self.kafka_handler = None
 
 	def finish(self):
@@ -78,15 +78,15 @@ class SqlRunner:
 			self.kafka_handler.finish()
 
 	def show_stats(self, stats_table: dict):
-		pelican_log("\n\n\n********************************")
-		pelican_log("Processing statistics by query:")
-		pelican_log("********************************\n\n\n")
+		sapsucker_log("\n\n\n********************************")
+		sapsucker_log("Processing statistics by query:")
+		sapsucker_log("********************************\n\n\n")
 		for table in stats_table:
 			temp = stats_table[table]
-			pelican_log(f"Query key: {table}")
-			pelican_log(f"\tGood: {temp[GOOD_RECORDS]}")
-			pelican_log(f"\tBad: {temp[BAD_RECORDS]}")
-			pelican_log(f"\tTotal: {temp[TOTAL]}\n")
+			sapsucker_log(f"Query key: {table}")
+			sapsucker_log(f"\tGood: {temp[GOOD_RECORDS]}")
+			sapsucker_log(f"\tBad: {temp[BAD_RECORDS]}")
+			sapsucker_log(f"\tTotal: {temp[TOTAL]}\n")
 
 	def execute_queries(self):
 		queries = self.profile["queries"]
@@ -126,10 +126,10 @@ class SqlRunner:
 						self.kafka_handler.send_record_set(topic, content)
 				except:
 					import traceback
-					traceback.pelican_log_exc()
+					traceback.sapsucker_log_exc()
 					current_table[BAD_RECORDS] = current_table[BAD_RECORDS] + 1
 					if self.command == "ingest":
-						pelican_log("Fatal error processing records during ingest.")
+						sapsucker_log("Fatal error processing records during ingest.")
 						sys.exit(1)
 				finally:
 					current_table[TOTAL] = current_table[TOTAL] + 1
@@ -139,12 +139,12 @@ class SqlRunner:
 
 class KafkaHandler:
 	def __init__(self, profile: dict):
-		pelican_log("Building KafkaHandler")
+		sapsucker_log("Building KafkaHandler")
 		self.profile = profile
 		if 'broker_list' in self.profile['kafka']:
 			broker_list = self.profile['kafka']['broker_list']
 			hosts = ",".join(broker_list)
-			pelican_log(hosts)
+			sapsucker_log(hosts)
 			self.client = pykafka.KafkaClient(hosts=hosts)
 			self.producers = {}
 		else:
@@ -152,7 +152,7 @@ class KafkaHandler:
 
 	def finish(self):
 		for producer in self.producers:
-			pelican_log(f"Stopping {producer}")
+			sapsucker_log(f"Stopping {producer}")
 			self.producers[producer].stop()
 
 

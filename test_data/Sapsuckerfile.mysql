@@ -1,5 +1,5 @@
 profile: development
-docker_tag: pelican:mysql
+docker_tag: sapsucker/mysql:dev
 debug: true
 database:
   version: 8
@@ -21,7 +21,7 @@ queries:
     schema: ./user.avsc
 ---
 profile: production
-docker_tag: pelican:mysql
+docker_tag: sapsucker/mysql:dev
 debug: false
 database:
   version: 8

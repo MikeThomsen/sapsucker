@@ -1,5 +1,6 @@
 profile: development
 docker_tag: pelican:mysql
+debug: true
 database:
   version: 8
   type: mysql
@@ -21,6 +22,7 @@ queries:
 ---
 profile: production
 docker_tag: pelican:mysql
+debug: false
 database:
   version: 8
   type: mysql

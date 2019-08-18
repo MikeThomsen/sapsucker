@@ -5,8 +5,7 @@ import json
 import yaml
 import os
 import os.path
-
-from pelican_lib import SqlRunner
+from pelican_lib import SqlRunner, pelican_log
 
 def parse_args():
 	parser = argparse.ArgumentParser(description='Build docker images around data for quick extraction.')
@@ -20,6 +19,7 @@ def init_pelicanfile():
 	struct = {
 		"profile": "development",
 		"docker_tag": "pelican:postgres",
+		"debug": True,
 		"database": {
 			"version": 11.5,
 			"type": "postgres",
@@ -46,7 +46,7 @@ def init_pelicanfile():
 
 	with open("./Pelicanfile", "w", encoding='utf-8') as raw:
 		yaml.dump(struct, raw)
-		print("Created Pelicanfile.")
+		pelican_log("Created Pelicanfile.")
 
 def create_dockerfile(profile: dict):
 	from_line = f"FROM {profile['database']['type']}:{profile['database']['version']}"
@@ -74,7 +74,7 @@ def create_dockerfile(profile: dict):
 			output.write(f"COPY {query['schema']} /opt/pelican/{query['schema']}\n")
 
 		output.write("COPY Pelicanfile.postgres /opt/pelican/Pelicanfile")
-		print("Wrote dockerfile")
+		pelican_log("Wrote dockerfile")
 
 	return docker_path
 
@@ -92,21 +92,21 @@ if __name__ == "__main__":
 	if args.command == "init":
 		init_pelicanfile()
 	elif args.command == "showprofiles":
-		print("Available profiles:")
+		pelican_log("Available profiles:")
 		for profile in profiles:
-			print(f"{profile}:\n{json.dumps(profiles[profile], sort_keys=True, indent=4)}")
+			pelican_log(f"{profile}:\n{json.dumps(profiles[profile], sort_keys=True, indent=4)}")
 	elif args.command in [ "build", "makedockerfile"]:
-		print(f"Using profile {args.profile}:\n{json.dumps(profiles[args.profile], indent=4, sort_keys=True)}")
+		pelican_log(f"Using profile {args.profile}:\n{json.dumps(profiles[args.profile], indent=4, sort_keys=True)}")
 
 		current_profile = profiles[args.profile]
 		ret_val = create_dockerfile(current_profile)
 
 		if args.command == "build":
-			print("Building docker image (this could take a while)...")
+			pelican_log("Building docker image (this could take a while)...")
 			docker_client.images.build(path="./", dockerfile=ret_val, tag=profile["docker_tag"])
-			print("Finished building docker image.")
+			pelican_log("Finished building docker image.")
 	elif args.command in [ "dryrun", "ingest" ]:
-		print(f"Running a \"{args.command}\"")
+		pelican_log(f"Running a \"{args.command}\"")
 		current_profile = profiles[args.profile]
 		sql_runner = SqlRunner(current_profile, args.command)
 		sql_runner.execute_queries()

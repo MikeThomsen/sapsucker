@@ -9,6 +9,25 @@ from avro.datafile import DataFileReader, DataFileWriter
 from avro.io import DatumReader, DatumWriter
 from io import BytesIO
 
+import logging
+import logging.handlers
+import os
+ 
+handler = logging.handlers.WatchedFileHandler(
+    os.environ.get("LOGFILE", "./pelican.log"))
+# formatter = logging.Formatter(logging.BASIC_FORMAT)
+# handler.setFormatter(formatter)
+root = logging.getLogger()
+root.setLevel(os.environ.get("LOGLEVEL", "INFO"))
+root.addHandler(handler)
+root.addHandler(logging.StreamHandler())
+
+def pelican_log(msg: str, ex: Exception = None):
+	logging.info(msg)
+	if ex:
+		logging.exception(ex)
+
+
 TOTAL = "total"
 GOOD_RECORDS = "good"
 BAD_RECORDS  = "bad"
@@ -49,8 +68,8 @@ class SqlRunner:
 		if 'kafka' in self.profile and command == "ingest":
 			self.kafka_handler = KafkaHandler(self.profile)
 		else:
-			print("No kafka")
-			print(self.profile)
+			pelican_log("No kafka")
+			pelican_log(self.profile)
 			self.kafka_handler = None
 
 	def finish(self):
@@ -58,15 +77,15 @@ class SqlRunner:
 			self.kafka_handler.finish()
 
 	def show_stats(self, stats_table: dict):
-		print("\n\n\n********************************")
-		print("Processing statistics by query:")
-		print("********************************\n\n\n")
+		pelican_log("\n\n\n********************************")
+		pelican_log("Processing statistics by query:")
+		pelican_log("********************************\n\n\n")
 		for table in stats_table:
 			temp = stats_table[table]
-			print(f"Query key: {table}")
-			print(f"\tGood: {temp[GOOD_RECORDS]}")
-			print(f"\tBad: {temp[BAD_RECORDS]}")
-			print(f"\tTotal: {temp[TOTAL]}\n")
+			pelican_log(f"Query key: {table}")
+			pelican_log(f"\tGood: {temp[GOOD_RECORDS]}")
+			pelican_log(f"\tBad: {temp[BAD_RECORDS]}")
+			pelican_log(f"\tTotal: {temp[TOTAL]}\n")
 
 	def execute_queries(self):
 		queries = self.profile["queries"]
@@ -81,10 +100,9 @@ class SqlRunner:
 		for query in queries:
 			sql_query   = queries[query]["sql"]
 			topic       = queries[query]["kafka_topic"]
-			schema_path = queries[query]['schema']
+			schema_path = queries[query]['schema'] if "schema" in queries[query] else None
 			self.cursor.execute(sql_query)
 			colnames = [desc[0] for desc in self.cursor.description]
-			print(colnames)
 			current_table = {
 				GOOD_RECORDS: 0,
 				BAD_RECORDS: 0,
@@ -98,17 +116,19 @@ class SqlRunner:
 				row_dicts = [ dict(zip(colnames, row)) for row in rows ]
 
 				try:
-					content = self.avro_handler.make_record_set(schema_path, row_dicts)
+					if schema_path:
+						content = self.avro_handler.make_record_set(schema_path, row_dicts)
+					else:
+						content = json.dumps(row_dicts).encode('utf-8')
 					current_table[GOOD_RECORDS] = current_table[GOOD_RECORDS] + 1
 					if self.kafka_handler:
-						print("Producing...")
 						self.kafka_handler.send_record_set(topic, content)
 				except:
 					import traceback
-					traceback.print_exc()
+					traceback.pelican_log_exc()
 					current_table[BAD_RECORDS] = current_table[BAD_RECORDS] + 1
 					if self.command == "ingest":
-						print("Fatal error processing records during ingest.")
+						pelican_log("Fatal error processing records during ingest.")
 						sys.exit(1)
 				finally:
 					current_table[TOTAL] = current_table[TOTAL] + 1
@@ -118,12 +138,12 @@ class SqlRunner:
 
 class KafkaHandler:
 	def __init__(self, profile: dict):
-		print("Building KafkaHandler")
+		pelican_log("Building KafkaHandler")
 		self.profile = profile
 		if 'broker_list' in self.profile['kafka']:
 			broker_list = self.profile['kafka']['broker_list']
 			hosts = ",".join(broker_list)
-			print(hosts)
+			pelican_log(hosts)
 			self.client = pykafka.KafkaClient(hosts=hosts)
 			self.producers = {}
 		else:
@@ -131,7 +151,7 @@ class KafkaHandler:
 
 	def finish(self):
 		for producer in self.producers:
-			print(f"Stopping {producer}")
+			pelican_log(f"Stopping {producer}")
 			self.producers[producer].stop()
 
 

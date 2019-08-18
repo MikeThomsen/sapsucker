@@ -1,5 +1,6 @@
 profile: development
 docker_tag: pelican:postgres
+debug: true
 database:
   version: 11.5
   type: postgres
@@ -20,6 +21,7 @@ queries:
 ---
 profile: production
 docker_tag: pelican:postgres
+debug: false
 database:
   version: 11.5
   type: postgres

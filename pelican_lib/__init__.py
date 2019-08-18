@@ -1,4 +1,5 @@
 import avro
+import json
 import pykafka
 import pymysql
 import psycopg2
